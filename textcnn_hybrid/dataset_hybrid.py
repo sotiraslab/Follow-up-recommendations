@@ -11,8 +11,7 @@ from functools import partial
 OOV_ID = -1
 
 class Word2VecDataset(object):
-  """Dataset for generating matrices holding word indices to train Word2Vec 
-  models.
+  """Dataset for generating matrices holding word indices to train Word2Vec models.
   """
   def __init__(self,
                arch='skip_gram',
@@ -131,9 +130,13 @@ class Word2VecDataset(object):
     raw_vocab = collections.Counter()
     raw_vocab.update("[pad]".split())
     for line in X_test:
-      #raw_vocab.update(line.strip().split())
-      raw_vocab.update(line.split())  #########处理方式应该 same as tf.data.Dataset
-
+      raw_vocab.update(line.split())  
+    
+    # Save
+    # import json
+    # with open('raw_vocab.json', 'w') as f:
+    #    json.dump(raw_vocab, f)
+    
     if self._max_vocab_size > 0:
       raw_vocab = raw_vocab[:self._max_vocab_size]
     raw_vocab = raw_vocab.items()
@@ -151,6 +154,26 @@ class Word2VecDataset(object):
       self._unigram_counts.append(count)
       self._keep_probs.append(keep_prob)
 
+  def build_vocab_counter(self, raw_vocab):
+    
+    if self._max_vocab_size > 0:
+      raw_vocab = raw_vocab[:self._max_vocab_size]
+    raw_vocab = raw_vocab.items()
+    
+    self.raw_vocab = [(w, c) for w, c in raw_vocab if c >= self._min_count]
+    self._corpus_size = sum(list(zip(*raw_vocab))[1])
+
+    self._table_words = []
+    self._unigram_counts = []
+    self._keep_probs = []
+    for word, count in raw_vocab:
+      frac = count / float(self._corpus_size)
+      keep_prob = (np.sqrt(frac / self._sample) + 1) * (self._sample / frac)
+      keep_prob = np.minimum(keep_prob, 1.0).astype(np.float32)
+      self._table_words.append(word)
+      self._unigram_counts.append(count)
+      self._keep_probs.append(keep_prob)
+        
   def build_word_class_correlations(self, X_train, y_train):
     """Builds vocabulary.
 
@@ -342,6 +365,7 @@ class Word2VecDataset(object):
       #print(i)
       return np.float32(np.array(w2v2darray))
 
+    
 def generate_wordpairs(dataset, min_count, max_document_length, word_to_id, keep_probs, window_size, arch, raw_vocab, codes_points):
 
     def per_target_fn(index):
@@ -395,8 +419,8 @@ def generate_wordpairs(dataset, min_count, max_document_length, word_to_id, keep
     count = 0
     for indices, indices_full in zip(filt_data_id, data_id):
         if len(indices) < 2:
-            print(indices)
-            print(len(indices_full))
+            #print(indices)
+            #print(len(indices_full))
             count = count + 1
             if len(indices_full) >= 2:
                 indices = indices_full
@@ -437,7 +461,7 @@ def generate_wordpairs(dataset, min_count, max_document_length, word_to_id, keep
         all_windows.append(windows)
         #all_data.append(indices)
         #all_labels.append(label)
-    print(count)
+    #print(count)
     #pad 0 to dataset
     data_id = kr.preprocessing.sequence.pad_sequences(data_id, maxlen=max_document_length, padding='post')
     #filt_data_id = kr.preprocessing.sequence.pad_sequences(filt_data_id, maxlen=max_document_length, padding='post')
