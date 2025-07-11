@@ -20,7 +20,7 @@ parser.add_argument('--operation', type=str, required=True, help="Mean/max/min o
 args = parser.parse_args()
 
 #read train set
-train_list = open("./DocSVM/Finding/Train/train.txt",'r')
+train_list = open("./DocSVM/Impression/Train/train.txt",'r')
 train_data = []; train_label = []
 for line in train_list:
     label, text = line.split('\t')
@@ -33,7 +33,7 @@ train_list.close()
 df_train = pd.DataFrame(train_data, columns = ['Report Text'])
 
 #read validation set
-validation_list = open("./DocSVM/Finding/Validation/validation.txt",'r')
+validation_list = open("./DocSVM/Impression/Validation/validation.txt",'r')
 validation_data = []; validation_label = []
 for line in validation_list:
     label, text = line.split('\t')
@@ -46,7 +46,7 @@ validation_list.close()
 df_validation = pd.DataFrame(validation_data, columns = ['Report Text'])
 
 #read test set
-test_list = open("./DocSVM/Finding/Test/test.txt",'r')
+test_list = open("./DocSVM/Impression/Test/test.txt",'r')
 test_data = []; test_label = []
 for line in test_list:
     label, text = line.split('\t')
@@ -59,7 +59,7 @@ test_list.close()
 df_test = pd.DataFrame(test_data, columns = ['Report Text'])
 
 #Read Word Vectors
-word_vector_file = './DocSVM/files/output/300/finding/model'
+word_vector_file = './DocSVM/files/output/300/impression/model'
 vocab_, embd, word_vector_map, word_embeddings_dim = loadWord2Vec(word_vector_file)
 del vocab_, embd
 
@@ -111,13 +111,13 @@ for c in Cs:
 print('best_f1:' + str(best_f1) + '    optimal_ker:' + str(optimal_ker) + '    optimal_c:' + str(optimal_c) + '    optimal_gamma:' + str(optimal_gam))
 print('------------Test Set-----------')
 #Save trained model:
-output_svm_model_path = './DocSVM/model/' + str(option) + '_finding_model.pkl'
+output_svm_model_path = './DocSVM/model/' + str(option) + '_impression_model.pkl'
 with open(output_svm_model_path,'wb') as f:
     pickle.dump(clf,f)
 
 # print('------------probability prediction-----------')
 prob_predict = best_clf.predict_proba(X_test)  # <class 'numpy.ndarray'>  shape:(999,2)
-np.save(option + '_finding.npy', prob_predict)
+np.save(option + '_impression.npy', prob_predict)
 prob_label = prob_predict[:, 1].copy()
 y_pred = prob_predict[:, 1].copy()
 y_pred[y_pred < 0.5] = 0
@@ -157,5 +157,3 @@ print("Precision:", precision)
 print("Recall:", recall)
 print("Accuracy:", accuracy)
 print("F1 Score:", f1)
-
-
