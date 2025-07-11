@@ -18,6 +18,7 @@ keywords_set2 = ["clinically indicated", "clinically concerned", "continued atte
                  "as clinically warranted", "will follow", "scheduled for" 
                  "planned", "could be further", "could be obtained", "could be performed" ]
 
+# Root directory for the testset
 root_directory = ''
 
 #for Test set
