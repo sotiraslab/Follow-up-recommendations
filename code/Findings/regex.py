@@ -22,9 +22,9 @@ keywords_set2 = ["clinically indicated", "clinically concerned", "continued atte
 root_directory = ''
 
 #for Test set
-test_fu_annotated = root_directory + 'annotated followup_TEST_0.8remaining.xlsx'
-test_nfu_annotated = root_directory + 'annotated nofollowup_TEST_0.8remaining.xlsx'
-test_templated = root_directory + 'template used_wo_CTA_MG_DXA_3D_EMPTY_TEST_0.8remaining.xlsx'
+test_fu_annotated = root_directory + 'test_fu_annotated.xlsx'
+test_nfu_annotated = root_directory + 'test_nfu_annotated.xlsx'
+test_templated = root_directory + 'test_templated.xlsx'
 test_fu_annotated = pd.read_excel(test_fu_annotated)
 test_templated = pd.read_excel(test_templated)
 test_nfu_annotated = pd.read_excel(test_nfu_annotated)
