@@ -113,20 +113,14 @@ def converttoBertFormat(filename, fileformat, posorneg):
         all_sent_of_each_document = all_sent_of_each_document.replace(". ", " [period] ")
         all_sent_of_each_document = all_sent_of_each_document.replace(".", " [period]")
         all_sent_of_each_document = all_sent_of_each_document.replace(", ", " [comma] ")
-        #Impression.append(all_sent_of_each_document)
         if num_words > max_num_words:
           max_num_words = num_words
         pdImpression.loc[i] = all_sent_of_each_document
-        #if i > 1000:
-        #    break
-    #Impression_all = '\n'.join(Impression)
-    # Output the impression part.
-    # Impressions are split by '\n'. Sentences in Impression part are split by ' '.
+        
     return pdImpression, max_num_words
 
 def exttokens(df, tce, num_ext, posorneg):
-    #tce means top, center or end
-    #num_ext: the number of extracted tokens
+    
     pdImpression = pd.DataFrame(columns=['Report Text'])
     countword = []
     for i in range(0, df['Report Text'].count()):
@@ -315,12 +309,7 @@ def readtestimpretoDataframe(filename):
             sent = sents.split('Electronically signed by')[0]
         else:
             sent = sents
-            #print(i)
-            #print(sents)
-            # raise RuntimeError('There is a sample without Dictated by')
-        # sent = sents.split('Dictated by')[0]
-        # if sent == '' or ' ' or '.' or '\n':
-        #    continue
+            
         sent = sent.replace("\n", " ")
         sent = sent.split(".")
         for subsent in sent:
@@ -341,8 +330,7 @@ def readtestimpretoDataframe(filename):
             continue
         all_sent_of_each_document = ' '.join(sent_of_each_document)
         pdImpression.loc[i] = [dftest['Accession Number'][i], all_sent_of_each_document]
-        #if i > 500:
-        #    break
+        
     pdImpression = pdImpression.reset_index(drop=True)
     return pdImpression, dftest
 

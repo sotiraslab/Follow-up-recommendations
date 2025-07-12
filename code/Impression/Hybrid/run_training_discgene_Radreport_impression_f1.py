@@ -45,7 +45,7 @@ flags.DEFINE_integer('save_per_batch', 100, 'Every `save_per_batch` batch to '
 flags.DEFINE_integer('print_per_batch', 100, '每多少轮次输出在训练集和验证集上的性能')
 flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 flags.DEFINE_string('dataset', 'Radreport', 'Used dataset')  #[R8, 20ng]
-flags.DEFINE_string('out_dir', '/scratch/panxiao/large-scale-comparison-setting1/textcnn_hybrid/Radreport_Impression_f1/output', 'Output directory.')
+flags.DEFINE_string('out_dir', './Radreport_Impression_f1/output', 'Output directory.')
 
 #######textcnn
 # Model Hyperparameters
@@ -64,7 +64,7 @@ flags.DEFINE_integer('iterations', 3000, 'The number of iteration.')
 
 FLAGS = flags.FLAGS
 
-save_dir = '/scratch/panxiao/large-scale-comparison-setting1/textcnn_hybrid/Radreport_Impression_f1/checkpoints/textcnn_impression/' + FLAGS.dataset + '_' + FLAGS.w2v_source + '_epochs' + str(FLAGS.epochs) + '_bs' + str(FLAGS.batch_size) + '_bl' \
+save_dir = './Radreport_Impression_f1/checkpoints/textcnn_impression/' + FLAGS.dataset + '_' + FLAGS.w2v_source + '_epochs' + str(FLAGS.epochs) + '_bs' + str(FLAGS.batch_size) + '_bl' \
            + str(FLAGS.balance_lambda) + '_bf' + str(FLAGS.balance_function)  + '_l2' + str(FLAGS.l2_reg_lambda) + '_fold' + str(FLAGS.fold) + '_iterations' + str(FLAGS.iterations)
 save_path = os.path.join(save_dir, 'best_validation')  # 最佳验证结果保存路径
 print(save_dir, flush=True)
@@ -118,7 +118,6 @@ def feed_data(model, x_batch, y_batch, dropout_keep_prob, wordpairs_batch, balan
     return feed_dict, num_batch_wordpairs
 
 def evaluate(model, sess, x_, y_, wordpairs_dev):
-    """评估在某一数据上的准确率和损失"""
     data_len = len(x_)
     batch_eval = batch_iter_wo_permutation(x_, y_, wordpairs_dev, 256)
     total_loss = 0.0
@@ -151,7 +150,6 @@ def evaluate(model, sess, x_, y_, wordpairs_dev):
 
 def train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpairs_dev, x_test, y_test, wordpairs_test):
     print("Configuring TensorBoard and Saver...", flush=True)
-    # 配置 Tensorboard，重新训练时，请将tensorboard文件夹删除，不然图会覆盖
     tensorboard_dir = 'tensorboard/Textcnn_Impression_' + FLAGS.dataset + '_' + FLAGS.w2v_source + '_epochs' + str(FLAGS.epochs) + '_bs' + str(FLAGS.batch_size) + '_bl' \
            + str(FLAGS.balance_lambda) + '_bf' + str(FLAGS.balance_function)  + '_l2' + str(FLAGS.l2_reg_lambda) + '_fold' + str(FLAGS.fold) + '_iterations' + str(FLAGS.iterations)
     if not os.path.exists(tensorboard_dir):
@@ -162,80 +160,46 @@ def train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpair
     merged_summary = tf.summary.merge_all()
     writer = tf.summary.FileWriter(tensorboard_dir)
 
-    # 配置 Saver
     saver = tf.train.Saver()
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     print("Loading training and validation data...", flush=True)
-    # 载入训练集与验证集
 
-    # 创建session
     session = tf.Session()
     session.run(tf.global_variables_initializer())
     writer.add_graph(session.graph)
 
     print('Training and evaluating...')
     start_time = time.time()
-    total_batch = 0  # 总批次
-    best_acc_val = 0.0  # 最佳验证集准确率
-    best_f1_val = 0.0  # 最佳验证集准确率
-    last_improved = 0  # 记录上一次提升批次
-    require_improvement = FLAGS.iterations  # 如果超过1000轮未提升，提前结束训练
+    total_batch = 0  
+    best_acc_val = 0.0  
+    best_f1_val = 0.0  
+    last_improved = 0  
+    require_improvement = FLAGS.iterations  
 
     flag = False
     for epoch in range(FLAGS.epochs):
         print('Epoch:', epoch + 1, flush=True)
-        #print('Epoch:', epoch + 1)
         batch_train = batch_iter(x_train, y_train, wordpairs_train, FLAGS.batch_size)
         for x_batch, y_batch, wordpairs_batch, ith_batch, num_batch in batch_train:
             progress = (epoch*num_batch+ith_batch + 1)/(FLAGS.epochs*num_batch)
-            ###one epoch = 20 fail/   epoch = 10 fail/
-            #balance_lambda = FLAGS.balance_lambda*(progress - 1)**4
-            #balance_lambda = 0
+            
             sigfunc = math.exp(-(FLAGS.balance_function * (progress - 0.5)))
             balance_lambda = FLAGS.balance_lambda*sigfunc/(sigfunc+1)
-            ###two     epoch = 5 fail/    epoch = 10 fail
-            #if progress < 0.5:
-            #    balance_lambda = -999*2*progress + 1000
-            #elif progress >= 0.5:
-            #    balance_lambda = -2*progress + 2
-            ###three   epoch = 5
-            #balance_lambda = FLAGS.balance_lambda/len(np.concatenate(wordpairs_batch))
-            ###four    epoch = 5
-            #balance_lambda = 0
-            #learning_rate = tf.maximum(FLAGS.alpha * (1 - progress) +
-            #                           FLAGS.min_alpha * progress, FLAGS.min_alpha)
-
-            #convert x_batch to input_x, input_words, output_words
-            #w2vdataset.get_wordpairs(x_batch, hybridmodel.sequence_length)
+            
             feed_dict, num_batch_wordpairs = feed_data(hybridmodel, x_batch, y_batch, FLAGS.dropout_keep_prob, wordpairs_batch, balance_lambda)
-            #hybridmodel._num_batch_wordpairs = num_batch_wordpairs
-            #print(hybridmodel._num_batch_wordpairs)
-            #hybridmodel._learning_rate = learning_rate
+            
             if total_batch % FLAGS.save_per_batch == 0:
-                # 每多少轮次将训练结果写入tensorboard scalar
                 s = session.run(merged_summary, feed_dict=feed_dict)
                 writer.add_summary(s, total_batch)
-            '''
-            if ith_batch + 1 == num_batch:
-                loss_test, acc_test, prfs, cf = evaluate(hybridmodel, session, x_test, y_test, wordpairs_test)
-                print('\n\n####################################')
-                print('Accuracy for test dataset:' + str(acc_test))
-                print('#################################### ')
-                print("Binary_precision_recall_fscore_support:" + str(prfs))
-                print('Confusion Matrix:\n', cf)
-                print('####################################\n\n')
-            '''
+            
 
             if total_batch % FLAGS.print_per_batch == 0:
-                # 每多少轮次输出在训练集和验证集上的性能
                 feed_dict[hybridmodel.dropout_keep_prob] = 1.0
-                #下面这行代码只用来输出结果，没有更新参数！
                 loss_textcnn, loss_w2v, loss_train, acc_train, syn0 = session.run([hybridmodel.loss_textcnn, hybridmodel.loss_w2v, hybridmodel.total_losses, hybridmodel.accuracy_textcnn, hybridmodel.syn0], feed_dict=feed_dict)
                 loss_val, acc_val, prfs, cf, y_preds, y_trues, y_probs = evaluate(hybridmodel, session, x_dev, y_dev, wordpairs_dev)  # todo
                 if prfs[2] > best_f1_val :
-                    #保存最好结果
                     best_f1_val = prfs[2]
                     print('\n\n####################################')
                     print('f1 for validation dataset:' + str(best_f1_val))
@@ -271,14 +235,13 @@ def train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpair
                 print(msg.format(total_batch, loss_textcnn, loss_w2v.mean(), loss_train.mean(), acc_train, loss_val, acc_val, time_dif, improved_str, num_batch_wordpairs, balance_lambda), flush=True)
 
             feed_dict[hybridmodel.dropout_keep_prob] = FLAGS.dropout_keep_prob
-            session.run(hybridmodel.grad_update_op, feed_dict=feed_dict)  # 运行优化
+            session.run(hybridmodel.grad_update_op, feed_dict=feed_dict)  
             total_batch += 1
             if total_batch - last_improved > require_improvement:
-                # 验证集正确率长期不提升，提前结束训练
                 print("No optimization for a long time, auto-stopping...", flush=True)
                 flag = True
-                break  # 跳出循环
-        if flag:  # 同上
+                break  
+        if flag: 
             break
 
     return  syn0_final, y_preds_best, y_trues_best, y_probs_best
@@ -310,26 +273,9 @@ def main(_):
   # test
   x_test, y_test = load_data_labels(Te)
 
-  # External Evaluation Arash
-  #arash_path = '/scratch/panxiao/large-scale-comparison-setting1/External_evaluation/mimic-cxr-impression-Arash.txt' 
-  #arash_E = read_external_dataset_impression(arash_path, fold)
-  #x_arash, y_arash= load_data_labels(arash_E)
+  
 
-  # External Evaluation Mohamed
-  #mohamed_path = '/scratch/panxiao/large-scale-comparison-setting1/External_evaluation/mimic-cxr-impression-Mohamed.txt' 
-  #mohamed_E = read_external_dataset_impression(mohamed_path, fold)
-  #x_mohamed, y_mohamed = load_data_labels(mohamed_E)
 
-  # Prospective Study
-  #ps_path = '/scratch/panxiao/large-scale-comparison-setting1/Prospective Study/prospective_study.txt' 
-  #ps_E = read_external_dataset_impression(ps_path, fold)
-  #x_ps, y_ps = load_data_labels(ps_E)
-
-  # Split train/val set
-  # TODO: This is very crude, should use cross-validation
-  #dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y)))
-  #x_train, x_dev = x_text[:dev_sample_index], x_text[dev_sample_index:]
-  #y_train, y_dev = y[:dev_sample_index], y[dev_sample_index:]
 
   #should just use training dataset!!!!!
   w2vdataset = Word2VecDataset(arch=FLAGS.arch,
@@ -349,26 +295,16 @@ def main(_):
   #w2v_source = "google"
   print(FLAGS.w2v_source)
   if FLAGS.w2v_source == "google":
-    google_news_vec = "/scratch/panxiao/large-scale-comparison-setting1/textcnn_hybrid/word2vec/GoogleNews-vectors-negative300/GoogleNews-vectors-negative300.bin.gz"
+    google_news_vec = "./word2vec/GoogleNews-vectors-negative300/GoogleNews-vectors-negative300.bin.gz"
     model_googlew2v = gensim.models.KeyedVectors.load_word2vec_format(google_news_vec, binary=True)
     w2v2darray = w2vdataset.buildw2vmap_google(w2vdataset.table_words, model_googlew2v)
   elif FLAGS.w2v_source == "random":
     w2v2darray = np.float32(np.random.uniform( -0.5 / FLAGS.embed_size,
         0.5 / FLAGS.embed_size, [len(w2vdataset._unigram_counts), FLAGS.embed_size]))
-  elif FLAGS.w2v_source == 'pre-train':
-    # Read Word Vectors
-    word_vector_file = './files/output_impression/' + str(FLAGS.embed_size) + '/' + 'model'
-    vocab_, embd, word_vector_map, word_embeddings_dim = loadWord2Vec(word_vector_file)
-    w2v2darray = w2vdataset.buildw2vmap_pretrain(w2vdataset.table_words, word_vector_map)
 
   x_train, wordpairs_train = w2vdataset.get_wordpairs(x_train, FLAGS.min_count, max_document_length)
   x_dev, wordpairs_dev = w2vdataset.get_wordpairs(x_dev, FLAGS.min_count, max_document_length)
   x_test, wordpairs_test = w2vdataset.get_wordpairs(x_test, FLAGS.min_count, max_document_length)
-
-  #x_arash, wordpairs_arash = w2vdataset.get_wordpairs(x_arash, FLAGS.min_count, max_document_length)
-  #x_mohamed, wordpairs_mohamed = w2vdataset.get_wordpairs(x_mohamed, FLAGS.min_count, max_document_length)
-  #x_ps, wordpairs_ps = w2vdataset.get_wordpairs(x_ps, FLAGS.min_count, max_document_length)
-
 
   #sampling table for negative sampling
   #http://mccormickml.com/2017/01/11/word2vec-tutorial-part-2-negative-sampling/
@@ -425,25 +361,6 @@ def main(_):
   print('Word embeddings saved to', os.path.join(dirembed + '/' 'embed.npy'), file=f_results)
   print('Vocabulary saved to', os.path.join(dirembed + '/' 'vocab.txt'), file=f_results)
   print('Vocabulary saved to', os.path.join(dirembed + '/' 'y_probs_best.npy'), file=f_results)
-
-  embed = dirembed + '/' + 'embed.npy'
-  vocab = dirembed + '/' + 'vocab.txt'
-  embed = np.load(embed)
-  f = open(vocab, "r")
-  vocab = []
-  for line in f:
-      vocab.append(line.rstrip())
-
-  WV = WordVectors(embed, vocab)
-  fo = dirembed + '/' + 'model'
-  savemodelfile(WV, fo, False)
-  print(WV.most_similar('followup',20), flush=True)
-  print(WV.most_similar('cancer',20), flush=True)
-  print(WV.most_similar('right', 20), flush=True)
-  print(WV.most_similar('good', 20),flush=True)
-  print(WV.most_similar('negative', 20),flush=True)
-  print(WV.most_similar('pulmonary', 20), flush=True)
-  print(WV.most_similar('tumor', 20),flush=True)
 
 if __name__ == '__main__':
   tf.app.run()

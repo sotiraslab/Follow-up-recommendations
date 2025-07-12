@@ -174,7 +174,6 @@ class HybridModel(object):
               self.balance_lambda, self.loss_w2v)
 
       with tf.name_scope("optimize"):
-          # 优化器
           global_step = tf.train.get_or_create_global_step()
           #self.learning_rate = tf.maximum(self._alpha * (1 - 0.5) +
           #                                self._min_alpha * 0.5, self._min_alpha)
