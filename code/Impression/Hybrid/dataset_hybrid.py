@@ -132,11 +132,6 @@ class Word2VecDataset(object):
     for line in X_test:
       raw_vocab.update(line.split())  
     
-    # Save
-    # import json
-    # with open('raw_vocab.json', 'w') as f:
-    #    json.dump(raw_vocab, f)
-    
     if self._max_vocab_size > 0:
       raw_vocab = raw_vocab[:self._max_vocab_size]
     raw_vocab = raw_vocab.items()
@@ -190,11 +185,11 @@ class Word2VecDataset(object):
       filenames: list of strings, holding names of text files.
     """
     vocab_pos = collections.Counter()
-    vocab_pos.update("[pad]".split())  #####用来填充，使得所有的句子等长
+    vocab_pos.update("[pad]".split())  
     vocab_neg = collections.Counter()
-    vocab_neg.update("[pad]".split())  #####用来填充，使得所有的句子等长
+    vocab_neg.update("[pad]".split())  
     vocab_all = collections.Counter()
-    vocab_all.update("[pad]".split())  #####用来填充，使得所有的句子等长
+    vocab_all.update("[pad]".split())  
     for x, y in zip(X_train, y_train):
         # raw_vocab.update(line.strip().split())
         if y[1] == 1:
@@ -308,7 +303,6 @@ class Word2VecDataset(object):
     else:
       raise ValueError('algm must be hierarchical_softmax or negative_sampling')
 
-    #build a dict   (word and id)
     word_to_id = dict(zip(table_words, range(len(table_words))))
 
     wordpairs = generate_wordpairs(dataset, min_count, max_document_length, word_to_id, keep_probs,
@@ -320,33 +314,27 @@ class Word2VecDataset(object):
 
       dimension = len(word_vector_map['the'])
       w2v2darray = []
-      #i = 0
       for word in table_words:
           if word in word_vector_map:
               word_vector = word_vector_map[word]
           else:
-              #print(word)
-              #i = i + 1
+              
               word_vector = np.random.uniform( -0.5/dimension,
         0.5/dimension, dimension)
           w2v2darray.append(word_vector)
-      #print(i)
       return np.float32(np.array(w2v2darray))
 
   def buildw2vmap_google(self, table_words, model):
 
       w2v2darray = []
-      #i = 0
       for word in table_words:
           if word in model.index_to_key:
               word_vector = model.vectors[model.index_to_key.index(word)]
           else:
-              #print(word)
-              #i = i + 1
+              
               word_vector = np.random.uniform( -0.5/300,
         0.5/300, 300)
           w2v2darray.append(word_vector)
-      #print(i)
       return np.float32(np.array(w2v2darray))
 
   def buildw2vmap_pretrain(self, table_words, model):
@@ -357,8 +345,7 @@ class Word2VecDataset(object):
           if word in model:
               word_vector = model[word]
           else:
-              #print(word)
-              #i = i + 1
+              
               word_vector = np.random.uniform( -0.5/300,
         0.5/300, 300)
           w2v2darray.append(word_vector)
@@ -369,12 +356,11 @@ class Word2VecDataset(object):
 def generate_wordpairs(dataset, min_count, max_document_length, word_to_id, keep_probs, window_size, arch, raw_vocab, codes_points):
 
     def per_target_fn(index):
-        #reduced_size = tf.random_uniform([], maxval=window_size, dtype=tf.int32)
         reduced_size = np.random.randint(0, high=window_size)
         left = list(range(np.maximum(index - window_size + reduced_size, 0), index))
         right = list(range(index + 1,
                          np.minimum(index + 1 + window_size - reduced_size, np.size(subindices))))
-        context = left + right  ####这里求出来的相当于索引，还要把索引对应的元素取出来
+        context = left + right  
         context = [subindices[i] for i in context]
 
         if arch == 'skip_gram':
@@ -382,17 +368,11 @@ def generate_wordpairs(dataset, min_count, max_document_length, word_to_id, keep
             window = np.column_stack((input_words, context))
         elif arch == 'cbow':
             true_size = context.size
-            # true_size = tf.Print(true_size,[true_size],summarize=20)
-            # print('true_size:',true_size.shape)
-            #pads = tf.pad(context, [[0, 2 * window_size - true_size]])
-            # tf.Print(pads,[pads], summarize=20)
+            
             window = tf.concat([tf.pad(context, [[0, 2 * window_size - true_size]]),
                                 [true_size, indices[index]]], axis=0)
-            # tf.Print(window,[window],summarize=20)
-            # print('window:',window.shape)
             window = tf.expand_dims(window, axis=0)
-            # tf.Print(window,[window],summarize=20)
-            # print('window:', window.shape)
+            
         else:
             raise ValueError('architecture must be skip_gram or cbow.')
 
@@ -401,7 +381,6 @@ def generate_wordpairs(dataset, min_count, max_document_length, word_to_id, keep
                                 tf.gather(codes_points, window[:, -1])], axis=1)
         return window
 
-    #list to dict
     raw_vocab = dict(raw_vocab)
 
     data_id = []
@@ -410,17 +389,13 @@ def generate_wordpairs(dataset, min_count, max_document_length, word_to_id, keep
         data_id.append([word_to_id[x] for x in dataset[i].split() if x in word_to_id])
         filt_data_id.append([word_to_id[x] for x in dataset[i].split() if x in raw_vocab.keys() and raw_vocab[x] >=min_count])
 
-    #use min_count to filter each sentence
-
     keep_probs = np.array(keep_probs)  #list to array
     all_windows = []
-    #all_data = []
-    #all_labels = []
+    
     count = 0
     for indices, indices_full in zip(filt_data_id, data_id):
         if len(indices) < 2:
-            #print(indices)
-            #print(len(indices_full))
+            
             count = count + 1
             if len(indices_full) >= 2:
                 indices = indices_full
@@ -428,23 +403,13 @@ def generate_wordpairs(dataset, min_count, max_document_length, word_to_id, keep
                 indices = 2*indices_full
             else:
                 indices = 2*[0]
-            #continue
         keep_probs_text = keep_probs[indices]
         randvars = np.random.uniform(0, 1, np.size(keep_probs_text))
         boolean_mask = randvars < keep_probs_text
         subindices = [b for a, b in zip(boolean_mask, indices) if a]
         if len(subindices) < 2:
-            #if downsample, cannot form wordpairs, then no dowmsample
             subindices = indices
-            #all_windows.append(np.array([[np.random.randint(low=1, high=len(word_to_id)-1)]*2, [np.random.randint(low=1, high=len(word_to_id)-1)]*2]))
-            #all_data.append(indices)
-            #all_labels.append(label)
-            #print(indices)
-            #print(subindices)
-            #print()
-            #count = count + 1
-            #continue
-            #raise ValueError('the size of subindices must be larger than 1')
+            
         index = 0
         windows = []
         while index < len(subindices):
@@ -452,18 +417,9 @@ def generate_wordpairs(dataset, min_count, max_document_length, word_to_id, keep
             windows.append(window)
             index += 1
         windows = np.concatenate(windows)
-        '''uiu
-        if windows.shape[0] < num_wordpairs:
-            windows = true_fn(windows)u
-        else:
-            windows = false_fn(windows)
-        '''
+        
         all_windows.append(windows)
-        #all_data.append(indices)
-        #all_labels.append(label)
-    #print(count)
-    #pad 0 to dataset
+        
     data_id = kr.preprocessing.sequence.pad_sequences(data_id, maxlen=max_document_length, padding='post')
-    #filt_data_id = kr.preprocessing.sequence.pad_sequences(filt_data_id, maxlen=max_document_length, padding='post')
     return data_id, np.array(all_windows)
 
