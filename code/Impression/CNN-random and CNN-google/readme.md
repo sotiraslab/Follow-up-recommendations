@@ -1,0 +1,1 @@
+We refer to the github reporsitory "https://github.com/yoonkim/CNN_sentence" for CNN-random and CNN-google models.
