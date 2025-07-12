@@ -323,9 +323,9 @@ def get_datasets_Radreport_Findings_tvt(fold):
 
 def read_dataset_impression(seed):
     # filenames
-    train = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Impression/Train/train.txt'
-    validation = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Impression/Validation/validation.txt'
-    test = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Impression/Test/test.txt'
+    train = './Impression/Train/train.txt'
+    validation = './Impression/Validation/validation.txt'
+    test = './Impression/Test/test.txt'
 
     print(train)
     print(validation)
@@ -410,9 +410,9 @@ def read_external_dataset_impression(file_path, seed):
 
 def read_dataset_finding(seed):
     # filenames
-    train = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Finding/Train/train.txt'
-    validation = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Finding/Validation/validation.txt'
-    test = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Finding/Test/test.txt'
+    train = './Finding/Train/train.txt'
+    validation = './Finding/Validation/validation.txt'
+    test = './Finding/Test/test.txt'
 
     print(train)
     print(validation)
@@ -461,179 +461,6 @@ def read_dataset_finding(seed):
     Te = Bunch(data=test_set, target=test_target, target_names=le.classes_)
 
     return Tr, Val, Te
-
-
-def get_datasets_R52(seed):
-    #filenames
-    trainind = './data/R52/R52.train.index'
-    testind = './data/R52/R52.test.index'
-    split_labels = './data/R52/R52.txt'
-    cleaneddata = './data/R52/R52.clean.txt'
-    #read files
-    cleaned_data = []
-    f = open(cleaneddata, 'rb')
-    for line in f.readlines():
-        cleaned_data.append(line.strip().decode('latin1'))
-    f.close()
-    #read train index
-    train_ind = []
-    f = open(trainind, 'rb')
-    for line in f.readlines():
-        train_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read test index
-    test_ind = []
-    f = open(testind, 'rb')
-    for line in f.readlines():
-        test_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read labels
-    labels = []
-    f = open(split_labels, 'r')
-    for line in f.readlines():
-        labels.append(line.split("\t")[2].strip())
-    f.close()
-
-    train = []; test = []; train_label = []; test_label = []
-    for i in range(len(labels)):
-        if str(i) in train_ind:
-            train.append(cleaned_data[i]); train_label.append(labels[i])
-        elif str(i) in test_ind:
-            test.append(cleaned_data[i]); test_label.append(labels[i])
-    import random
-    random.seed(seed)
-    c = list(zip(train, train_label)); random.shuffle(c); train, train_label = zip(*c)
-    c = list(zip(test, test_label)); random.shuffle(c); test, test_label = zip(*c)
-    from sklearn.preprocessing import LabelEncoder
-    le = LabelEncoder()
-    train_target = le.fit_transform(train_label)
-    test_target = le.transform(test_label)
-    from sklearn.utils import Bunch
-
-    Tr = Bunch(data = train, target = train_target, target_names=le.classes_)
-    Te = Bunch(data = test, target = test_target, target_names=le.classes_)
-
-    return Tr, Te
-
-def get_datasets_ohsumed(seed):
-    """
-    Retrieve data from R8
-    :param subset: train, test or all
-    :param categories: List of newsgroup name
-    :param shuffle: shuffle the list or not
-    :param random_state: seed integer to shuffle the dataset
-    :return: data and labels of the newsgroup
-    """
-    #filenames
-    trainind = './data/ohsumed_single_23/ohsumed.train.index'
-    testind = './data/ohsumed_single_23/ohsumed.test.index'
-    split_labels = './data/ohsumed_single_23/ohsumed.txt'
-    cleaneddata = './data/ohsumed_single_23/ohsumed.clean.txt'
-    #read files
-    cleaned_data = []
-    f = open(cleaneddata, 'rb')
-    for line in f.readlines():
-        cleaned_data.append(line.strip().decode('latin1'))
-    f.close()
-    #read train index
-    train_ind = []
-    f = open(trainind, 'rb')
-    for line in f.readlines():
-        train_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read test index
-    test_ind = []
-    f = open(testind, 'rb')
-    for line in f.readlines():
-        test_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read labels
-    labels = []
-    f = open(split_labels, 'r')
-    for line in f.readlines():
-        labels.append(line.split("\t")[2].strip())
-    f.close()
-
-    train = []; test = []; train_label = []; test_label = []
-    for i in range(len(labels)):
-        if str(i) in train_ind:
-            train.append(cleaned_data[i]); train_label.append(labels[i])
-        elif str(i) in test_ind:
-            test.append(cleaned_data[i]); test_label.append(labels[i])
-    import random
-    random.seed(seed)
-    c = list(zip(train, train_label)); random.shuffle(c); train, train_label = zip(*c)
-    c = list(zip(test, test_label)); random.shuffle(c); test, test_label = zip(*c)
-    from sklearn.preprocessing import LabelEncoder
-    le = LabelEncoder()
-    train_target = le.fit_transform(train_label)
-    test_target = le.transform(test_label)
-    from sklearn.utils import Bunch
-
-    Tr = Bunch(data = train, target = train_target, target_names=le.classes_)
-    Te = Bunch(data = test, target = test_target, target_names=le.classes_)
-
-    return Tr, Te
-
-def get_datasets_mr(seed):
-    """
-    Retrieve data from R8
-    :param subset: train, test or all
-    :param categories: List of newsgroup name
-    :param shuffle: shuffle the list or not
-    :param random_state: seed integer to shuffle the dataset
-    :return: data and labels of the newsgroup
-    """
-    #filenames
-    trainind = './data/mr/mr.train.index'
-    testind = './data/mr/mr.test.index'
-    split_labels = './data/mr/mr.txt'
-    cleaneddata = './data/mr/mr.clean.txt'
-    #read files
-    cleaned_data = []
-    f = open(cleaneddata, 'rb')
-    for line in f.readlines():
-        cleaned_data.append(line.strip().decode('latin1'))
-    f.close()
-    #read train index
-    train_ind = []
-    f = open(trainind, 'rb')
-    for line in f.readlines():
-        train_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read test index
-    test_ind = []
-    f = open(testind, 'rb')
-    for line in f.readlines():
-        test_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read labels
-    labels = []
-    f = open(split_labels, 'r')
-    for line in f.readlines():
-        labels.append(line.split("\t")[2].strip())
-    f.close()
-
-    train = []; test = []; train_label = []; test_label = []
-    for i in range(len(labels)):
-        if str(i) in train_ind:
-            train.append(cleaned_data[i]); train_label.append(labels[i])
-        elif str(i) in test_ind:
-            test.append(cleaned_data[i]); test_label.append(labels[i])
-    import random
-    random.seed(seed)
-    c = list(zip(train, train_label)); random.shuffle(c); train, train_label = zip(*c)
-    c = list(zip(test, test_label)); random.shuffle(c); test, test_label = zip(*c)
-    from sklearn.preprocessing import LabelEncoder
-    le = LabelEncoder()
-    train_target = le.fit_transform(train_label)
-    test_target = le.transform(test_label)
-    from sklearn.utils import Bunch
-
-    Tr = Bunch(data = train, target = train_target, target_names=le.classes_)
-    Te = Bunch(data = test, target = test_target, target_names=le.classes_)
-
-    return Tr, Te
 
 
 def load_data_labels(datasets):

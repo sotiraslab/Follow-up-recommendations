@@ -39,125 +39,6 @@ def clean_str_sst(string):
     string = re.sub(r"\s{2,}", " ", string)
     return string.strip().lower()
 
-def get_datasets_20newsgroup(seed):
-    """
-    Retrieve data from 20 newsgroups
-    :param subset: train, test or all
-    :param categories: List of newsgroup name
-    :param shuffle: shuffle the list or not
-    :param random_state: seed integer to shuffle the dataset
-    :return: data and labels of the newsgroup
-    """
-    #filenames
-    trainind = './data/20ng/20ng.train.index'
-    testind = './data/20ng/20ng.test.index'
-    split_labels = './data/20ng/20ng.txt'
-    cleaneddata = './data/20ng/20ng.clean.txt'
-    #read files
-    cleaned_data = []
-    f = open(cleaneddata, 'rb')
-    for line in f.readlines():
-        cleaned_data.append(line.strip().decode('latin1'))
-    f.close()
-    #read train index
-    train_ind = []
-    f = open(trainind, 'rb')
-    for line in f.readlines():
-        train_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read test index
-    test_ind = []
-    f = open(testind, 'rb')
-    for line in f.readlines():
-        test_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read labels
-    labels = []
-    f = open(split_labels, 'r')
-    for line in f.readlines():
-        labels.append(line.split("\t")[2])
-    f.close()
-
-    train = []; test = []; train_label = []; test_label = []
-    for i in range(len(labels)):
-        if str(i) in train_ind:
-            train.append(cleaned_data[i]); train_label.append(labels[i])
-        elif str(i) in test_ind:
-            test.append(cleaned_data[i]); test_label.append(labels[i])
-
-    random.seed(seed)
-    c = list(zip(train, train_label)); random.shuffle(c); train, train_label = zip(*c)
-    c = list(zip(test, test_label)); random.shuffle(c); test, test_label = zip(*c)
-    from sklearn.preprocessing import LabelEncoder
-    le = LabelEncoder()
-    train_target = le.fit_transform(train_label)
-    test_target = le.transform(test_label)
-    from sklearn.utils import Bunch
-
-    Tr = Bunch(data=train, target=train_target, target_names=le.classes_)
-    Te = Bunch(data=test, target=test_target, target_names=le.classes_)
-
-    return Tr, Te
-
-def get_datasets_R8(seed):
-    """
-    Retrieve data from R8
-    :param subset: train, test or all
-    :param categories: List of newsgroup name
-    :param shuffle: shuffle the list or not
-    :param random_state: seed integer to shuffle the dataset
-    :return: data and labels of the newsgroup
-    """
-    #filenames
-    trainind = './data/R8/R8.train.index'
-    testind = './data/R8/R8.test.index'
-    split_labels = './data/R8/R8.txt'
-    cleaneddata = './data/R8/R8.clean.txt'
-    #read files
-    cleaned_data = []
-    f = open(cleaneddata, 'rb')
-    for line in f.readlines():
-        cleaned_data.append(line.strip().decode('latin1'))
-    f.close()
-    #read train index
-    train_ind = []
-    f = open(trainind, 'rb')
-    for line in f.readlines():
-        train_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read test index
-    test_ind = []
-    f = open(testind, 'rb')
-    for line in f.readlines():
-        test_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read labels
-    labels = []
-    f = open(split_labels, 'r')
-    for line in f.readlines():
-        labels.append(line.split("\t")[2].strip())
-    f.close()
-
-    train = []; test = []; train_label = []; test_label = []
-    for i in range(len(labels)):
-        if str(i) in train_ind:
-            train.append(cleaned_data[i]); train_label.append(labels[i])
-        elif str(i) in test_ind:
-            test.append(cleaned_data[i]); test_label.append(labels[i])
-    import random
-    random.seed(seed)
-    c = list(zip(train, train_label)); random.shuffle(c); train, train_label = zip(*c)
-    c = list(zip(test, test_label)); random.shuffle(c); test, test_label = zip(*c)
-    from sklearn.preprocessing import LabelEncoder
-    le = LabelEncoder()
-    train_target = le.fit_transform(train_label)
-    test_target = le.transform(test_label)
-    from sklearn.utils import Bunch
-
-    Tr = Bunch(data = train, target = train_target, target_names=le.classes_)
-    Te = Bunch(data = test, target = test_target, target_names=le.classes_)
-
-    return Tr, Te
 
 def get_datasets_Radreport(seed):
     #filenames
@@ -265,6 +146,7 @@ def get_datasets_Radreport_impression_tvt(fold):
     return Tr, Val, Te
 
 def get_datasets_Radreport_Findings_tvt(fold):
+    
     #filenames
     #trainind = './data/Radreport_Findings/Radreport_Finding.train.index'
     #testind = './data/Radreport_Findings/Radreport_Finding.test.index'
@@ -323,9 +205,9 @@ def get_datasets_Radreport_Findings_tvt(fold):
 
 def read_dataset_impression(seed):
     # filenames
-    train = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Impression/Train/train.txt'
-    validation = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Impression/Validation/validation.txt'
-    test = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Impression/Test/test.txt'
+    train = './Impression/Train/train.txt'
+    validation = './Impression/Validation/validation.txt'
+    test = './Impression/Test/test.txt'
 
     print(train)
     print(validation)
@@ -410,9 +292,9 @@ def read_external_dataset_impression(file_path, seed):
 
 def read_dataset_finding(seed):
     # filenames
-    train = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Finding/Train/train.txt'
-    validation = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Finding/Validation/validation.txt'
-    test = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/Finding/Test/test.txt'
+    train = './Finding/Train/train.txt'
+    validation = './Finding/Validation/validation.txt'
+    test = './Finding/Test/test.txt'
 
     print(train)
     print(validation)
@@ -463,179 +345,6 @@ def read_dataset_finding(seed):
     return Tr, Val, Te
 
 
-def get_datasets_R52(seed):
-    #filenames
-    trainind = './data/R52/R52.train.index'
-    testind = './data/R52/R52.test.index'
-    split_labels = './data/R52/R52.txt'
-    cleaneddata = './data/R52/R52.clean.txt'
-    #read files
-    cleaned_data = []
-    f = open(cleaneddata, 'rb')
-    for line in f.readlines():
-        cleaned_data.append(line.strip().decode('latin1'))
-    f.close()
-    #read train index
-    train_ind = []
-    f = open(trainind, 'rb')
-    for line in f.readlines():
-        train_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read test index
-    test_ind = []
-    f = open(testind, 'rb')
-    for line in f.readlines():
-        test_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read labels
-    labels = []
-    f = open(split_labels, 'r')
-    for line in f.readlines():
-        labels.append(line.split("\t")[2].strip())
-    f.close()
-
-    train = []; test = []; train_label = []; test_label = []
-    for i in range(len(labels)):
-        if str(i) in train_ind:
-            train.append(cleaned_data[i]); train_label.append(labels[i])
-        elif str(i) in test_ind:
-            test.append(cleaned_data[i]); test_label.append(labels[i])
-    import random
-    random.seed(seed)
-    c = list(zip(train, train_label)); random.shuffle(c); train, train_label = zip(*c)
-    c = list(zip(test, test_label)); random.shuffle(c); test, test_label = zip(*c)
-    from sklearn.preprocessing import LabelEncoder
-    le = LabelEncoder()
-    train_target = le.fit_transform(train_label)
-    test_target = le.transform(test_label)
-    from sklearn.utils import Bunch
-
-    Tr = Bunch(data = train, target = train_target, target_names=le.classes_)
-    Te = Bunch(data = test, target = test_target, target_names=le.classes_)
-
-    return Tr, Te
-
-def get_datasets_ohsumed(seed):
-    """
-    Retrieve data from R8
-    :param subset: train, test or all
-    :param categories: List of newsgroup name
-    :param shuffle: shuffle the list or not
-    :param random_state: seed integer to shuffle the dataset
-    :return: data and labels of the newsgroup
-    """
-    #filenames
-    trainind = './data/ohsumed_single_23/ohsumed.train.index'
-    testind = './data/ohsumed_single_23/ohsumed.test.index'
-    split_labels = './data/ohsumed_single_23/ohsumed.txt'
-    cleaneddata = './data/ohsumed_single_23/ohsumed.clean.txt'
-    #read files
-    cleaned_data = []
-    f = open(cleaneddata, 'rb')
-    for line in f.readlines():
-        cleaned_data.append(line.strip().decode('latin1'))
-    f.close()
-    #read train index
-    train_ind = []
-    f = open(trainind, 'rb')
-    for line in f.readlines():
-        train_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read test index
-    test_ind = []
-    f = open(testind, 'rb')
-    for line in f.readlines():
-        test_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read labels
-    labels = []
-    f = open(split_labels, 'r')
-    for line in f.readlines():
-        labels.append(line.split("\t")[2].strip())
-    f.close()
-
-    train = []; test = []; train_label = []; test_label = []
-    for i in range(len(labels)):
-        if str(i) in train_ind:
-            train.append(cleaned_data[i]); train_label.append(labels[i])
-        elif str(i) in test_ind:
-            test.append(cleaned_data[i]); test_label.append(labels[i])
-    import random
-    random.seed(seed)
-    c = list(zip(train, train_label)); random.shuffle(c); train, train_label = zip(*c)
-    c = list(zip(test, test_label)); random.shuffle(c); test, test_label = zip(*c)
-    from sklearn.preprocessing import LabelEncoder
-    le = LabelEncoder()
-    train_target = le.fit_transform(train_label)
-    test_target = le.transform(test_label)
-    from sklearn.utils import Bunch
-
-    Tr = Bunch(data = train, target = train_target, target_names=le.classes_)
-    Te = Bunch(data = test, target = test_target, target_names=le.classes_)
-
-    return Tr, Te
-
-def get_datasets_mr(seed):
-    """
-    Retrieve data from R8
-    :param subset: train, test or all
-    :param categories: List of newsgroup name
-    :param shuffle: shuffle the list or not
-    :param random_state: seed integer to shuffle the dataset
-    :return: data and labels of the newsgroup
-    """
-    #filenames
-    trainind = './data/mr/mr.train.index'
-    testind = './data/mr/mr.test.index'
-    split_labels = './data/mr/mr.txt'
-    cleaneddata = './data/mr/mr.clean.txt'
-    #read files
-    cleaned_data = []
-    f = open(cleaneddata, 'rb')
-    for line in f.readlines():
-        cleaned_data.append(line.strip().decode('latin1'))
-    f.close()
-    #read train index
-    train_ind = []
-    f = open(trainind, 'rb')
-    for line in f.readlines():
-        train_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read test index
-    test_ind = []
-    f = open(testind, 'rb')
-    for line in f.readlines():
-        test_ind.append(line.strip().decode('latin1'))
-    f.close()
-    #read labels
-    labels = []
-    f = open(split_labels, 'r')
-    for line in f.readlines():
-        labels.append(line.split("\t")[2].strip())
-    f.close()
-
-    train = []; test = []; train_label = []; test_label = []
-    for i in range(len(labels)):
-        if str(i) in train_ind:
-            train.append(cleaned_data[i]); train_label.append(labels[i])
-        elif str(i) in test_ind:
-            test.append(cleaned_data[i]); test_label.append(labels[i])
-    import random
-    random.seed(seed)
-    c = list(zip(train, train_label)); random.shuffle(c); train, train_label = zip(*c)
-    c = list(zip(test, test_label)); random.shuffle(c); test, test_label = zip(*c)
-    from sklearn.preprocessing import LabelEncoder
-    le = LabelEncoder()
-    train_target = le.fit_transform(train_label)
-    test_target = le.transform(test_label)
-    from sklearn.utils import Bunch
-
-    Tr = Bunch(data = train, target = train_target, target_names=le.classes_)
-    Te = Bunch(data = test, target = test_target, target_names=le.classes_)
-
-    return Tr, Te
-
-
 def load_data_labels(datasets):
     """
     Load data and labels
@@ -676,7 +385,6 @@ def load_data_and_labels(positive_data_file, negative_data_file, num_folds):
     return [x_text, y]
 
 def batch_iter(x, y, wordpairs, batch_size=64):
-    """生成批次数据"""
     data_len = len(x)
     num_batch = int((data_len - 1) / batch_size) + 1
 
@@ -691,7 +399,6 @@ def batch_iter(x, y, wordpairs, batch_size=64):
         yield x_shuffle[start_id:end_id], y_shuffle[start_id:end_id], wordpairs_shuffle[start_id:end_id], i, num_batch
 
 def batch_iter_wo_permutation(x, y, wordpairs, batch_size=64): #without permutation
-    """生成批次数据"""
     data_len = len(x)
     num_batch = int((data_len - 1) / batch_size) + 1
 
@@ -718,14 +425,13 @@ def preprocess(positive_data_file, negative_data_file, dev_sample_percentage):
     #x = np.array(list(vocab_processor.fit_transform(x_text)))
 
     # Randomly shuffle data
-    #np.random.seed(10)   ######后面使用np.random.randint这样的函数，生成的随机数序列都确定了
+    #np.random.seed(10)   
     shuffle_indices = np.random.permutation(np.arange(len(y)))
     x_shuffled = []
     for i in shuffle_indices:
         x_shuffled.append(x_text[i])
     y_shuffled = y[shuffle_indices]
 
-    # Split train/test set   ####这种切割方法有点问题？   应该是正负例里面切割出来之后合并？  而不是合并之后再切割？
     # TODO: This is very crude, should use cross-validation
     dev_sample_index = -1 * int(dev_sample_percentage * float(len(y)))
     x_train, x_dev = x_shuffled[:dev_sample_index], x_shuffled[dev_sample_index:]
@@ -818,23 +524,7 @@ def cvfolds_preprocess(positive_data_file, negative_data_file, num_folds, fold):
     y_train = np.array(y_train)
     y_dev = np.array(y_dev)
     y_test = np.array(y_test)
-    '''
-    #inds = np.arange(len(y))
-    kf = KFold(n_splits=10)
-
-    i = 1
-    x_train = []
-    x_dev = []
-    for train_index, dev_index in kf.split(y_shuffled):
-        if fold == i:
-            for inds in train_index:
-                x_train.append(x_shuffled[inds])
-            for inds in dev_index:
-                x_dev.append(x_shuffled[inds])
-            #x_train, x_dev = x_text[train_index], x_text[test_index]
-            y_train, y_dev = y_shuffled[train_index], y_shuffled[dev_index]
-        i += 1
-    '''
+    
     del x_shuffled, y_shuffled, x_text, y
 
     return x_train, y_train, x_dev, y_dev, x_test, y_test, max_document_length
@@ -922,7 +612,6 @@ def loadWord2Vec(filename):
     return vocab, embd, word_vector_map, word_embeddings_dim
 
 
-#option = [mean, max, maxmin]
 def get_doc_vec_options(dfset, word_vector_map, word_embeddings_dim, option):
 
     real_size = len(dfset)
@@ -937,9 +626,7 @@ def get_doc_vec_options(dfset, word_vector_map, word_embeddings_dim, option):
         if type(doc_words) is float:
             print(doc_words)
             doc_words = str(doc_words)
-        #doc_words = doc_words.replace('.', ' ')
-        #doc_words = doc_words.replace(',', ' ')
-        #words = word_tokenize(doc_words)  # all words in one document
+        
         words = doc_words.split(" ")
         wordcount = 0
         for word in words:
@@ -977,13 +664,10 @@ def get_doc_vec_options(dfset, word_vector_map, word_embeddings_dim, option):
             print(i)
             print('\n')
             dfset = dfset.drop(i)
-    #dfset = dfset.reset_index(drop=True)    #reset the index (https://pandas.pydata.org/pandas-docs/version/0.22.0/generated/pandas.DataFrame.reset_index.html)
-    #dfset['doc vec'] = data_all_word_vec
 
     return  data_all_word_vec
 
 
-#option = [mean, max, maxmin]
 def get_doc_vec_options_google(dfset, model, word_embeddings_dim, option):
 
     real_size = len(dfset)
@@ -998,9 +682,7 @@ def get_doc_vec_options_google(dfset, model, word_embeddings_dim, option):
         if type(doc_words) is float:
             print(doc_words)
             doc_words = str(doc_words)
-        #doc_words = doc_words.replace('.', ' ')
-        #doc_words = doc_words.replace(',', ' ')
-        #words = word_tokenize(doc_words)  # all words in one document
+        
         words = doc_words.split(" ")
         wordcount = 0
         for word in words:
@@ -1008,8 +690,6 @@ def get_doc_vec_options_google(dfset, model, word_embeddings_dim, option):
                 wordcount = wordcount + 1
                 #contain numerical positive and negative values
                 word_vector = model.vectors[model.index2word.index(word)]
-                # print(doc_vec)
-                # print(np.array(word_vector))
                 if option == 'mean':
                     doc_vec = doc_vec + np.array(word_vector)  # add all word vector to represent doc vec
                 elif option == 'max':
@@ -1035,12 +715,9 @@ def get_doc_vec_options_google(dfset, model, word_embeddings_dim, option):
         else: # delete the null samples
             doc_vec = np.random.rand(300)
             data_all_word_vec.append(doc_vec)
-            #raise ValueError('Document is Null')
             print("Document is null")
             print(words)
             print('\n')
-            #dfset = dfset.drop(i)
-    #dfset = dfset.reset_index(drop=True)    #reset the index (https://pandas.pydata.org/pandas-docs/version/0.22.0/generated/pandas.DataFrame.reset_index.html)
-    #dfset['doc vec'] = data_all_word_vec
+
 
     return  data_all_word_vec
