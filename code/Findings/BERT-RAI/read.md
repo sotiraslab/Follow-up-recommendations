@@ -1,0 +1,1 @@
+We reference the Github reporsitory "https://github.com/NooshinAbbasi/Recommendation-for-Additional-Imaging" for the BERT-RAI models.
