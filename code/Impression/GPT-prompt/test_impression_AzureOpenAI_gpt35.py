@@ -54,4 +54,4 @@ with open(output_file_path, 'w') as file:
     for line in predictions_gpt_3p5_turbo:
         file.write(line + '\n')  # Write each item from the list with a newline character
 
-print(f'(Finding) Text list saved to {output_file_path}')
+print(f'(Text list saved to {output_file_path}')
