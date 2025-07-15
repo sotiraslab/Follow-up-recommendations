@@ -1,0 +1,1 @@
+We follow this tutorial https://learn.microsoft.com/en-us/azure/ai-foundry/openai/tutorials/fine-tune?tabs=command-line to finetune the gpt-4o-mini model.
