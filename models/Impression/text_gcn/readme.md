@@ -1,0 +1,1 @@
+Link to download the pre-trained model: https://drive.google.com/drive/folders/1bx5Q3vQN911EdZMIHh_WESKqNRAC_Y0m?usp=drive_link
