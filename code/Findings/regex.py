@@ -34,7 +34,7 @@ gts = []
 finding_kw_predicted = []
 i = 0
 for index, row in test_fu_annotated.iterrows():
-    report = row['meta.Report Text']
+    report = row['Report Text']
     #Extract Finding
     if (report.find('IMPRESSION:') >= 0):
         str_wo_impression = report.split("IMPRESSION:")[0]
@@ -98,7 +98,7 @@ for index, row in test_templated.iterrows():
 
 
 for index, row in test_nfu_annotated.iterrows():
-    report = row['meta.Report Text']
+    report = row['Report Text']
     #Extract Finding
     if (report.find('IMPRESSION:') >= 0):
         str_wo_impression = report.split("IMPRESSION:")[0]

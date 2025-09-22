@@ -35,7 +35,7 @@ im_kw_predicted = []
 i = 0
 for index, row in test_fu_annotated.iterrows():
     
-    report = row['Text (Before)']
+    report = row['Report Text']
     #extract impression
     if (report.find('IMPRESSION:') >= 0):
         im = report.split("IMPRESSION:")[-1]
@@ -58,7 +58,7 @@ for index, row in test_fu_annotated.iterrows():
 
 for index, row in test_templated.iterrows():
     
-    report = row['Report Text (Before)']
+    report = row['Report Text']
     #extract impression
     if (report.find('IMPRESSION:') >= 0):
         im = report.split("IMPRESSION:")[-1]
@@ -80,7 +80,7 @@ for index, row in test_templated.iterrows():
 
 for index, row in test_nfu_annotated.iterrows():
     
-    report = row['Text (Before)']
+    report = row['Report Text']
     #extract impression
     if (report.find('IMPRESSION:') >= 0):
         im = report.split("IMPRESSION:")[-1]
