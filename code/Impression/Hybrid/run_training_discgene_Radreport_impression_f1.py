@@ -267,11 +267,7 @@ def main(_):
 
   # test
   x_test, y_test = load_data_labels(Te)
-
-  
-
-
-
+ 
   #should just use training dataset!!!!!
   w2vdataset = Word2VecDataset(arch=FLAGS.arch,
                             algm=FLAGS.algm,
