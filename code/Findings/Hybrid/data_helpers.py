@@ -545,14 +545,13 @@ def preprocess(positive_data_file, negative_data_file, dev_sample_percentage):
     #x = np.array(list(vocab_processor.fit_transform(x_text)))
 
     # Randomly shuffle data
-    #np.random.seed(10)   ######后面使用np.random.randint这样的函数，生成的随机数序列都确定了
     shuffle_indices = np.random.permutation(np.arange(len(y)))
     x_shuffled = []
     for i in shuffle_indices:
         x_shuffled.append(x_text[i])
     y_shuffled = y[shuffle_indices]
 
-    # Split train/test set   ####这种切割方法有点问题？   应该是正负例里面切割出来之后合并？  而不是合并之后再切割？
+    # Split train/test set   
     # TODO: This is very crude, should use cross-validation
     dev_sample_index = -1 * int(dev_sample_percentage * float(len(y)))
     x_train, x_dev = x_shuffled[:dev_sample_index], x_shuffled[dev_sample_index:]
@@ -749,7 +748,6 @@ def loadWord2Vec(filename):
     return vocab, embd, word_vector_map, word_embeddings_dim
 
 
-#option = [mean, max, maxmin]
 def get_doc_vec_options(dfset, word_vector_map, word_embeddings_dim, option):
 
     real_size = len(dfset)
@@ -764,9 +762,7 @@ def get_doc_vec_options(dfset, word_vector_map, word_embeddings_dim, option):
         if type(doc_words) is float:
             print(doc_words)
             doc_words = str(doc_words)
-        #doc_words = doc_words.replace('.', ' ')
-        #doc_words = doc_words.replace(',', ' ')
-        #words = word_tokenize(doc_words)  # all words in one document
+        
         words = doc_words.split(" ")
         wordcount = 0
         for word in words:
@@ -804,9 +800,7 @@ def get_doc_vec_options(dfset, word_vector_map, word_embeddings_dim, option):
             print(i)
             print('\n')
             dfset = dfset.drop(i)
-    #dfset = dfset.reset_index(drop=True)    #reset the index (https://pandas.pydata.org/pandas-docs/version/0.22.0/generated/pandas.DataFrame.reset_index.html)
-    #dfset['doc vec'] = data_all_word_vec
-
+    
     return  data_all_word_vec
 
 
@@ -866,8 +860,6 @@ def get_doc_vec_options_google(dfset, model, word_embeddings_dim, option):
             print("Document is null")
             print(words)
             print('\n')
-            #dfset = dfset.drop(i)
-    #dfset = dfset.reset_index(drop=True)    #reset the index (https://pandas.pydata.org/pandas-docs/version/0.22.0/generated/pandas.DataFrame.reset_index.html)
-    #dfset['doc vec'] = data_all_word_vec
+            
 
     return  data_all_word_vec

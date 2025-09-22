@@ -1,8 +1,3 @@
-# This Code is written based on word2vec and text-classification-cnn-rnn-master
-# Training set: 43580 de-identified radiology reports built using keywords searches
-# Validation set: 200 annotated reports, half of them are follow-up
-# Test set: 400 annotated reports, half of them are follow up
-
 #from __future__ import print_function
 import gensim
 import os
@@ -42,10 +37,10 @@ flags.DEFINE_boolean('add_bias', True, 'Whether to add bias term to dotproduct '
     'between syn0 and syn1 vectors.')
 flags.DEFINE_integer('save_per_batch', 100, 'Every `save_per_batch` batch to '
     ' tensorboard.')
-flags.DEFINE_integer('print_per_batch', 100, '每多少轮次输出在训练集和验证集上的性能')
+flags.DEFINE_integer('print_per_batch', 100, 'print_per_batch')
 flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-flags.DEFINE_string('dataset', 'Radreport', 'Used dataset')  #[R8, 20ng]
-flags.DEFINE_string('out_dir', '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/textcnn_hybrid/Radreport_Finding_f1/output', 'Output directory.')
+flags.DEFINE_string('dataset', 'Radreport', 'Used dataset') 
+flags.DEFINE_string('out_dir', './textcnn_hybrid/Radreport_Finding_f1/output', 'Output directory.')
 
 #######textcnn
 # Model Hyperparameters
@@ -64,7 +59,7 @@ flags.DEFINE_integer('iterations', 3000, 'The number of iteration.')
 
 FLAGS = flags.FLAGS
 
-save_dir = '/ceph/chpc/shared/aristeidis_sotiras_group/panxiao_scratch/large-scale-comparison-setting4/data_rad/two/textcnn_hybrid/Radreport_Finding_f1/checkpoints/textcnn_finding/' + FLAGS.dataset + '_' + FLAGS.w2v_source + '_epochs' + str(FLAGS.epochs) + '_bs' + str(FLAGS.batch_size) + '_bl' \
+save_dir = './textcnn_hybrid/Radreport_Finding_f1/checkpoints/textcnn_finding/' + FLAGS.dataset + '_' + FLAGS.w2v_source + '_epochs' + str(FLAGS.epochs) + '_bs' + str(FLAGS.batch_size) + '_bl' \
            + str(FLAGS.balance_lambda) + '_bf' + str(FLAGS.balance_function)  + '_l2' + str(FLAGS.l2_reg_lambda) + '_fold' + str(FLAGS.fold) + '_iterations' + str(FLAGS.iterations)
 save_path = os.path.join(save_dir, 'best_validation')  
 print(save_dir, flush=True)
@@ -92,16 +87,7 @@ def generate_sampling_table(unigram_counts, power):
 def feed_data(model, x_batch, y_batch, dropout_keep_prob, wordpairs_batch, balance_lambda):
     wordpairs_batch = np.concatenate(wordpairs_batch)
     input_words, output_words = np.hsplit(wordpairs_batch, 2)
-    '''
-    if len(input_words)>=FLAGS.wordpairs:
-        index = np.random.choice(len(input_words), size=FLAGS.wordpairs, replace=False)
-        input_words = input_words[index]
-        output_words = output_words[index]
-    else:
-        index = np.random.choice(len(input_words), size=FLAGS.wordpairs-len(input_words), replace=True)
-        input_words = np.concatenate((input_words,input_words[index]))
-        output_words = np.concatenate((output_words, output_words[index]))
-    '''
+    
     input_words = np.squeeze(input_words)
     output_words = np.squeeze(output_words)
     num_batch_wordpairs = len(wordpairs_batch)

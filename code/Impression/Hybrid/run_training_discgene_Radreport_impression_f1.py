@@ -1,8 +1,3 @@
-# This Code is written based on word2vec and text-classification-cnn-rnn-master
-# Training set: 43580 de-identified radiology reports built using keywords searches
-# Validation set: 200 annotated reports, half of them are follow-up
-# Test set: 400 annotated reports, half of them are follow up
-
 #from __future__ import print_function
 import gensim
 import os
@@ -42,22 +37,22 @@ flags.DEFINE_boolean('add_bias', True, 'Whether to add bias term to dotproduct '
     'between syn0 and syn1 vectors.')
 flags.DEFINE_integer('save_per_batch', 100, 'Every `save_per_batch` batch to '
     ' tensorboard.')
-flags.DEFINE_integer('print_per_batch', 100, '每多少轮次输出在训练集和验证集上的性能')
+flags.DEFINE_integer('print_per_batch', 100, 'print_per_batch')
 flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-flags.DEFINE_string('dataset', 'Radreport', 'Used dataset')  #[R8, 20ng]
+flags.DEFINE_string('dataset', 'Radreport', 'Used dataset')  
 flags.DEFINE_string('out_dir', './Radreport_Impression_f1/output', 'Output directory.')
 
 #######textcnn
 # Model Hyperparameters
-flags.DEFINE_integer('fold', 0, 'which fold to train')  #(0-9)
+flags.DEFINE_integer('fold', 0, 'which fold to train')  
 flags.DEFINE_integer('epochs', 10, 'Num of epochs to iterate training data.')
-flags.DEFINE_integer('batch_size', 4, 'Batch size for input sentences.')  ####real batch sentence (10) * wordpairs
+flags.DEFINE_integer('batch_size', 4, 'Batch size for input sentences.')
 flags.DEFINE_string('w2v_source', 'random', 'The source of w2v model_googlew2v (random or google)')
 flags.DEFINE_string("filter_sizes", "3,4,5", "Comma-separated filter sizes (default: '3,4,5')")
 flags.DEFINE_integer("num_filters", 128, "Number of filters per filter size (default: 128)")
 flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-flags.DEFINE_integer("balance_lambda", 0,"Parameter to balance word2vec loss.")   ####should be dynamic lambad, function (10, 50, 100, 500, 1000)
-flags.DEFINE_integer("balance_function", 0,"Function for dynamic balance parameter.")   #### (1, 5, 10, 15, 20, 25, 30)
+flags.DEFINE_integer("balance_lambda", 0,"Parameter to balance word2vec loss.")
+flags.DEFINE_integer("balance_function", 0,"Function for dynamic balance parameter.")
 flags.DEFINE_integer("l2_reg_lambda", 1, "L2 regularization lambda (default: 0.0)")
 
 flags.DEFINE_integer('iterations', 3000, 'The number of iteration.')
@@ -66,7 +61,7 @@ FLAGS = flags.FLAGS
 
 save_dir = './Radreport_Impression_f1/checkpoints/textcnn_impression/' + FLAGS.dataset + '_' + FLAGS.w2v_source + '_epochs' + str(FLAGS.epochs) + '_bs' + str(FLAGS.batch_size) + '_bl' \
            + str(FLAGS.balance_lambda) + '_bf' + str(FLAGS.balance_function)  + '_l2' + str(FLAGS.l2_reg_lambda) + '_fold' + str(FLAGS.fold) + '_iterations' + str(FLAGS.iterations)
-save_path = os.path.join(save_dir, 'best_validation')  # 最佳验证结果保存路径
+save_path = os.path.join(save_dir, 'best_validation')
 print(save_dir, flush=True)
 
 def get_time_dif(start_time):
