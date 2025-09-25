@@ -155,7 +155,7 @@ def main():
     model = train_paragraph_vector(train_docs, vector_size, epcoh)
     
     # Save the model (optional)
-    model.save(output_path + 'impression2/' + 'impression_' + 'paragraph_vector_model_vs' + str(vector_size) + '_epoch' + str(epcoh) + '.bin')
+    model.save(output_path + 'impression/' + 'impression_' + 'paragraph_vector_model_vs' + str(vector_size) + '_epoch' + str(epcoh) + '.bin')
     
     # Infer vectors for internal and external test sets
     #train_texts = train_texts[:100]; y_train = y_train[:100]

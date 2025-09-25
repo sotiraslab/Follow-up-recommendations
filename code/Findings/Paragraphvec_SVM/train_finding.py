@@ -91,8 +91,7 @@ def infer_vectors(model, test_docs, vector_size=100):
     return np.array(vectors)
 
 def main():
-    
-      
+          
     output_path = './paragraphvec/model/'
     
     #read train set
