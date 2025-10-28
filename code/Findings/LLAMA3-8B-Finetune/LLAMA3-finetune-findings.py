@@ -32,43 +32,41 @@ from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 MAX_LEN = 4096
 
 def make_predictions(model,df):
-    
-    # Convert summaries to a list
-    sentences = df.Text.tolist()
+  # Convert summaries to a list
+  sentences = df.Text.tolist()
 
-    # Define the batch size
-    batch_size = 32  # You can adjust this based on your system's memory capacity
+  # Define the batch size
+  batch_size = 32  # You can adjust this based on your system's memory capacity
 
-    # Initialize an empty list to store the model outputs
-    all_outputs = []
+  # Initialize an empty list to store the model outputs
+  all_outputs = []
 
-    # Process the sentences in batches
-    for i in range(0, len(sentences), batch_size):
-        # Get the batch of sentences
-        batch_sentences = sentences[i:i + batch_size]
+  # Process the sentences in batches
+  for i in range(0, len(sentences), batch_size):
+      # Get the batch of sentences
+      batch_sentences = sentences[i:i + batch_size]
 
-        # Tokenize the batch
-        inputs = tokenizer(batch_sentences, return_tensors="pt", padding=True, truncation=True, max_length=MAX_LEN)
+      # Tokenize the batch
+      inputs = tokenizer(batch_sentences, return_tensors="pt", padding=True, truncation=True, max_length=MAX_LEN)
 
-        # Move tensors to the device where the model is (e.g., GPU or CPU)
-        inputs = {k: v.to('cuda' if torch.cuda.is_available() else 'cpu') for k, v in inputs.items()}
+      # Move tensors to the device where the model is (e.g., GPU or CPU)
+      inputs = {k: v.to('cuda' if torch.cuda.is_available() else 'cpu') for k, v in inputs.items()}
 
-        # Perform inference and store the logits
-        with torch.no_grad():
-            outputs = model(**inputs)
-            all_outputs.append(outputs['logits'])
-    
-    final_outputs = torch.cat(all_outputs, dim=0)
-    #print('final_outputs:')
-    #print(final_outputs.cpu())
-    #print('final_outputs:')
-    #print(final_outputs.cpu().numpy())
-    df['final_outputs0'] = final_outputs.cpu().numpy()[:,0]
-    df['final_outputs1'] = final_outputs.cpu().numpy()[:,1]
-    df['predictions']=final_outputs.argmax(axis=1).cpu().numpy()
-    #df_test['predictions']=df_test['predictions'].apply(lambda l:category_map[l])
+      # Perform inference and store the logits
+      with torch.no_grad():
+          outputs = model(**inputs)
+          all_outputs.append(outputs['logits'])
+  final_outputs = torch.cat(all_outputs, dim=0)
+  #print('final_outputs:')
+  #print(final_outputs.cpu())
+  #print('final_outputs:')
+  #print(final_outputs.cpu().numpy())
+  df['final_outputs0'] = final_outputs.cpu().numpy()[:,0]
+  df['final_outputs1'] = final_outputs.cpu().numpy()[:,1]
+  df['predictions']=final_outputs.argmax(axis=1).cpu().numpy()
+  #df_test['predictions']=df_test['predictions'].apply(lambda l:category_map[l])
 
-    return df
+  return df
 
 
 def compute_metrics(eval_pred):
@@ -92,102 +90,102 @@ def llama_preprocessing_function(examples):
 
 def get_performance_metrics(df):
     
-    y_test = df.target
-    y_pred = df.predictions
+  y_test = df.target
+  y_pred = df.predictions
 
-    precision, recall, f1, _ = precision_recall_fscore_support(y_test, y_pred, average='binary')
-    acc = accuracy_score(y_test, y_pred)
-    dict_a = {'accuracy': acc, 'f1': f1, 'precision': precision, 'recall': recall}
-    print(dict_a)
+  precision, recall, f1, _ = precision_recall_fscore_support(y_test, y_pred, average='binary')
+  acc = accuracy_score(y_test, y_pred)
+  dict_a = {'accuracy': acc, 'f1': f1, 'precision': precision, 'recall': recall}
+  print(dict_a)
     
-    print("Confusion Matrix:")
-    print(confusion_matrix(y_test, y_pred))
+  print("Confusion Matrix:")
+  print(confusion_matrix(y_test, y_pred))
 
-    print("\nClassification Report:")
-    print(classification_report(y_test, y_pred))
+  print("\nClassification Report:")
+  print(classification_report(y_test, y_pred))
 
-    print("Balanced Accuracy Score:", balanced_accuracy_score(y_test, y_pred))
-    print("Accuracy Score:", accuracy_score(y_test, y_pred))
+  print("Balanced Accuracy Score:", balanced_accuracy_score(y_test, y_pred))
+  print("Accuracy Score:", accuracy_score(y_test, y_pred))
 
 
 # Adjust pandas display settings to show the full text
 pd.set_option('display.max_colwidth', None)
 
-train_impression_filepath = './Impression/Train/train.txt'
+train_finding_filepath = './Finding/Train/train.txt'
 # Initialize an empty list to store the rows
-traindata_impression = []
+traindata_finding = []
 
 # Open and read the file
-with open(train_impression_filepath, 'r') as file:
+with open(train_finding_filepath, 'r') as file:
     for line in file:
         gt, text = line.split('\t')
         # Check and modify 'nofollowup'
         if gt.lower() == 'nofollowup':
             gt = 'no followup'
         # Append the data as a tuple
-        traindata_impression.append((text.strip(), gt))  # .strip() to remove any trailing newlines or spaces
+        traindata_finding.append((text.strip(), gt))  # .strip() to remove any trailing newlines or spaces
 # Create a DataFrame from the list of tuples
-df_train_impression = pd.DataFrame(traindata_impression, columns=['Text', 'GroundTruth'])
+df_train_finding = pd.DataFrame(traindata_finding, columns=['Text', 'GroundTruth'])
 # Shuffle the DataFrame with a fixed seed
-df_train_impression = df_train_impression.sample(frac=1, random_state=42).reset_index(drop=True)
-# df_train_impression = df_train_impression.sample(n=10, random_state=42)
-df_train_impression['target'] = df_train_impression['GroundTruth'].map({'followup': 1, 'no followup': 0})
+df_train_finding = df_train_finding.sample(frac=1, random_state=42).reset_index(drop=True)
+# df_train_finding = df_train_finding.sample(n=10, random_state=42)
+df_train_finding['target'] = df_train_finding['GroundTruth'].map({'followup': 1, 'no followup': 0})
 # Display the resulting DataFrame
-print(df_train_impression.head(), flush=True)
+print(df_train_finding.head(), flush=True)
 
 
-# load impression one by one
-val_impression_filepath = './Impression/Validation/validation.txt'
+# load finding one by one
+val_finding_filepath = './Finding/Validation/validation.txt'
 # Initialize an empty list to store the rows
-valdata_impression = []
+valdata_finding = []
 
 # Open and read the file
-with open(val_impression_filepath, 'r') as file:
+with open(val_finding_filepath, 'r') as file:
     for line in file:
         gt, text = line.split('\t')
         # Check and modify 'nofollowup'
         if gt.lower() == 'nofollowup':
             gt = 'no followup'
         # Append the data as a tuple
-        valdata_impression.append((text.strip(), gt))  # .strip() to remove any trailing newlines or spaces
+        valdata_finding.append((text.strip(), gt))  # .strip() to remove any trailing newlines or spaces
 # Create a DataFrame from the list of tuples
-df_val_impression = pd.DataFrame(valdata_impression, columns=['Text', 'GroundTruth'])
+df_val_finding = pd.DataFrame(valdata_finding, columns=['Text', 'GroundTruth'])
 # Shuffle the DataFrame with a fixed seed
-df_val_impression = df_val_impression.sample(frac=1, random_state=42).reset_index(drop=True)
-# df_val_impression = df_val_impression.sample(n=10, random_state=42)
-df_val_impression['target'] = df_val_impression['GroundTruth'].map({'followup': 1, 'no followup': 0})
+df_val_finding = df_val_finding.sample(frac=1, random_state=42).reset_index(drop=True)
+# df_val_finding = df_val_finding.sample(n=10, random_state=42)
+df_val_finding['target'] = df_val_finding['GroundTruth'].map({'followup': 1, 'no followup': 0})
 # Display the resulting DataFrame
-print(df_val_impression.head(), flush=True)
+print(df_val_finding.head(), flush=True)
 
 
-# load impression one by one
-test_impression_filepath = './Impression/Test/test.txt'
+# load finding one by one
+test_finding_filepath = './Finding/Test/test.txt'
 # Initialize an empty list to store the rows
-testdata_impression = []
+testdata_finding = []
 
 # Open and read the file
-with open(test_impression_filepath, 'r') as file:
+with open(test_finding_filepath, 'r') as file:
     for line in file:
         gt, text = line.split('\t')
         # Check and modify 'nofollowup'
         if gt.lower() == 'nofollowup':
             gt = 'no followup'
         # Append the data as a tuple
-        testdata_impression.append((text.strip(), gt))  # .strip() to remove any trailing newlines or spaces
+        testdata_finding.append((text.strip(), gt))  # .strip() to remove any trailing newlines or spaces
 # Create a DataFrame from the list of tuples
-df_test_impression = pd.DataFrame(testdata_impression, columns=['Text', 'GroundTruth'])
+df_test_finding = pd.DataFrame(testdata_finding, columns=['Text', 'GroundTruth'])
 # Shuffle the DataFrame with a fixed seed
-#df_test_impression = df_test_impression.sample(frac=1, random_state=42).reset_index(drop=True)
-#df_test_impression = df_test_impression.sample(n=100, random_state=42)
-df_test_impression['target'] = df_test_impression['GroundTruth'].map({'followup': 1, 'no followup': 0})
+#df_test_finding = df_test_finding.sample(frac=1, random_state=42).reset_index(drop=True)
+#df_test_finding = df_test_finding.sample(n=100, random_state=42)
+df_test_finding['target'] = df_test_finding['GroundTruth'].map({'followup': 1, 'no followup': 0})
 # Display the resulting DataFrame
-print(df_test_impression.head(), flush=True)
+print(df_test_finding.head(), flush=True)
 
 
 # Converting pandas DataFrames into Hugging Face Dataset objects:
-dataset_train = Dataset.from_pandas(df_train_impression.drop('GroundTruth',axis=1))
-dataset_val = Dataset.from_pandas(df_val_impression.drop('GroundTruth',axis=1))
-dataset_test = Dataset.from_pandas(df_test_impression.drop('GroundTruth',axis=1))
+dataset_train = Dataset.from_pandas(df_train_finding.drop('GroundTruth',axis=1))
+dataset_val = Dataset.from_pandas(df_val_finding.drop('GroundTruth',axis=1))
+dataset_test = Dataset.from_pandas(df_test_finding.drop('GroundTruth',axis=1))
 
 
 # Combine them into a single DatasetDict
@@ -198,10 +196,10 @@ dataset = DatasetDict({
 })
 print(dataset, flush=True)
 print(dataset['train'], flush=True)
-print(df_train_impression.target.value_counts(normalize=True), flush=True)
+print(df_train_finding.target.value_counts(normalize=True), flush=True)
 
 
-class_weights=(1/df_train_impression.target.value_counts(normalize=True).sort_index()).tolist()
+class_weights=(1/df_train_finding.target.value_counts(normalize=True).sort_index()).tolist()
 class_weights=torch.tensor(class_weights)
 class_weights=class_weights/class_weights.sum()
 print(class_weights, flush=True)
@@ -217,6 +215,7 @@ quantization_config = BitsAndBytesConfig(
 
 num_rank = 128
 print('num_rank: ' + str(num_rank))
+
 lora_config = LoraConfig(
     r = num_rank, # the dimension of the low-rank matrices
     lora_alpha = 8, # scaling factor for LoRA activations vs pre-trained weight activations
@@ -246,13 +245,13 @@ model.config.use_cache = False
 model.config.pretraining_tp = 1
 
 
-sentences = df_test_impression.Text.tolist()
+sentences = df_test_finding.Text.tolist()
 print(sentences[0:2], flush=True)
 
 col_to_delete = ['Text']
 
 tokenized_datasets = dataset.map(llama_preprocessing_function, batched=True, remove_columns=col_to_delete)
-tokenized_datasets = tokenized_datasets.rename_column("target", "label")
+tokenized_datasets = tokenized_datasets.rename_column("target", "labels")
 tokenized_datasets.set_format("torch")
 
 collate_fn = DataCollatorWithPadding(tokenizer=tokenizer)
@@ -284,7 +283,7 @@ class CustomTrainer(Trainer):
 
         return (loss, outputs) if return_outputs else loss
 
-root_dir = './LLAMA3-finetune/incidentalfinding_finetune_impression_r' + str(num_rank)
+root_dir = './LLAMA3-finetune/finetune_finding_r' + str(num_rank)
 
 print('root_dir:' + str(root_dir))
 
@@ -301,6 +300,7 @@ training_args = TrainingArguments(
     evaluation_strategy = 'steps',
     eval_steps = 25,
     save_total_limit=2,
+    #save_strategy = 'epoch',
     save_steps = 25,
     save_strategy = 'steps',
     metric_for_best_model = 'f1',
@@ -325,22 +325,22 @@ eval_result = trainer.evaluate()
 print(train_result, flush=True)
 print(eval_result, flush=True)
 
-df_val_impression = make_predictions(model,df_val_impression)
-df_test_impression = make_predictions(model,df_test_impression)
+df_val_finding = make_predictions(model,df_val_finding)
+df_test_finding = make_predictions(model,df_test_finding)
 
 ####save pandas
 # Save the DataFrame to an Excel file
-df_val_impression.to_excel(root_dir + '/val_impression.xlsx', index=False)
-df_test_impression.to_excel(root_dir + '/test_impression.xlsx', index=False)
+df_val_finding.to_excel(root_dir + '/val_finding.xlsx', index=False)
+df_test_finding.to_excel(root_dir + '/test_finding.xlsx', index=False)
 
 
-#print(df_val_impression)
-#print(df_test_impression)
+#print(df_val_finding)
+#print(df_test_finding)
 print('performance on validation set:')
-get_performance_metrics(df_val_impression)
+get_performance_metrics(df_val_finding)
 print('\n\n\n=====================\n\n\n')
 print('performance on test set')
-get_performance_metrics(df_test_impression)
+get_performance_metrics(df_test_finding)
 
 metrics = train_result.metrics
 max_train_samples = len(dataset_train)
