@@ -38,7 +38,7 @@ with open(test_finding_filepath, 'r') as file:
         gts.append(gt)
         texts.append(text)
 
-        content = "I will provide you with some text, which belongs to the finding section of a radiology report. Can you tell me whether it contains a recommendation for a follow-up. Please respond with follow-up or no follow-up . The text is the following: "  + text
+        content = "I will provide you with some text, which belongs to the finding section of a radiology report. Can you tell me whether it contains a recommendation for a follow-up? Please respond with follow-up or no follow-up. The text is the following: "  + text
         message = HumanMessage(content=content)
         
         try:
