@@ -65,7 +65,7 @@ save_path = os.path.join(save_dir, 'best_validation')
 print(save_dir, flush=True)
 
 def get_time_dif(start_time):
-    """获取已使用时间"""
+    
     end_time = time.time()
     time_dif = end_time - start_time
     return timedelta(seconds=int(round(time_dif)))
@@ -88,16 +88,7 @@ def generate_sampling_table(unigram_counts, power):
 def feed_data(model, x_batch, y_batch, dropout_keep_prob, wordpairs_batch, balance_lambda):
     wordpairs_batch = np.concatenate(wordpairs_batch)
     input_words, output_words = np.hsplit(wordpairs_batch, 2)
-    '''
-    if len(input_words)>=FLAGS.wordpairs:
-        index = np.random.choice(len(input_words), size=FLAGS.wordpairs, replace=False)
-        input_words = input_words[index]
-        output_words = output_words[index]
-    else:
-        index = np.random.choice(len(input_words), size=FLAGS.wordpairs-len(input_words), replace=True)
-        input_words = np.concatenate((input_words,input_words[index]))
-        output_words = np.concatenate((output_words, output_words[index]))
-    '''
+    
     input_words = np.squeeze(input_words)
     output_words = np.squeeze(output_words)
     num_batch_wordpairs = len(wordpairs_batch)
@@ -194,35 +185,11 @@ def train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpair
                 feed_dict[hybridmodel.dropout_keep_prob] = 1.0
                 loss_textcnn, loss_w2v, loss_train, acc_train, syn0 = session.run([hybridmodel.loss_textcnn, hybridmodel.loss_w2v, hybridmodel.total_losses, hybridmodel.accuracy_textcnn, hybridmodel.syn0], feed_dict=feed_dict)
                 loss_val, acc_val, prfs, cf, y_preds, y_trues, y_probs = evaluate(hybridmodel, session, x_dev, y_dev, wordpairs_dev)  # todo
-                if prfs[2] > best_f1_val :
+                if prfs[2] > best_f1_val:
                     best_f1_val = prfs[2]
-                    print('\n\n####################################')
-                    print('f1 for validation dataset:' + str(best_f1_val))
-                    last_improved = total_batch
-                    saver.save(sess=session, save_path=save_path)
-                    improved_str = '*'
-                    loss_test, acc_test, prfs, cf, y_preds_best, y_trues_best, y_probs_best = evaluate(hybridmodel, session, x_test, y_test, wordpairs_test)
-                    print('\n\n####################################')
-                    print('Accuracy for test dataset:' + str(acc_test))
-                    print('f1 for test dataset:' + str(prfs[2]))
-                    print('#################################### ')
-                    print("Binary_precision_recall_fscore_support:" + str(prfs))
-                    print('Confusion Matrix:\n', cf)
-                    print('####################################\n\n')
-                    syn0_final = syn0
-                    
-                    import sys
-                    # Get the parent directory
-                    parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-                    # Add the parent directory to the system path
-                    sys.path.insert(0, parent_dir)
-                    from util import confidence_interval
-                    confidence_interval(y_trues_best, y_preds_best)
-                    
                 else:
                     improved_str = ''
-                #print("learning_rate:" + str(learning_rate))
-                #print("progress:" + str(progress))
+                
                 time_dif = get_time_dif(start_time)
                 msg = 'Iter: {0:>6}, Textcnn loss:{1:>6.2}, w2v loss:{2:>6.2}, Train Loss: {3:>6.2}, Train Acc: {4:>7.2%},' \
                       + ' Val Loss: {5:>6.2}, Val Acc: {6:>7.2%}, Time: {7} {8},' \
@@ -239,8 +206,6 @@ def train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpair
         if flag: 
             break
 
-    return  syn0_final, y_preds_best, y_trues_best, y_probs_best
-
 
 
 def main(_):
@@ -248,12 +213,6 @@ def main(_):
   if sys.argv[1] not in ['train', 'test']:
       raise ValueError("""usage: python run_cnn.py [train / test]""")
 
-  # data preparation
-  #fold = FLAGS.fold
-  #Tr, Val, Te = get_datasets_Radreport_tvt(seed)
-  #x_text, y = load_data_labels(Tr)
-  #max_document_length = max([len(x.split(" ")) for x in x_text])
-  # data preparation
   fold = FLAGS.fold
   Tr, Val, Te = read_dataset_impression(fold)
   x_text, y = load_data_labels(Tr)
@@ -340,12 +299,8 @@ def main(_):
   print('-----------4-------------', flush=True)
   if sys.argv[1] == 'train':
       print('-----------5-------------', flush=True)
-      syn0_final, y_preds_best, y_trues_best, y_probs_best = train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpairs_dev, x_test, y_test, wordpairs_test)
-  print('-----------6-------------', flush=True)
-  np.save((dirembed + '/' + 'embed'), syn0_final)
-  np.save((dirembed + '/' + 'y_preds_best'), y_preds_best)
-  np.save((dirembed + '/' + 'y_trues_best'), y_trues_best)
-  np.save((dirembed + '/' + 'y_probs_best'), y_probs_best)
+      train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpairs_dev, x_test, y_test, wordpairs_test)
+  
   with open((dirembed + '/' + 'vocab.txt'), 'w', encoding="utf-8") as fid:
     for w in w2vdataset.table_words:
       fid.write(w + '\n')

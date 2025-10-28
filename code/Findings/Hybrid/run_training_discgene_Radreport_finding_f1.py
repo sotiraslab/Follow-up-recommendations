@@ -189,26 +189,6 @@ def train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpair
 
                 if prfs[2] > best_f1_val:
                     best_f1_val = prfs[2]
-                    print('\n\n####################################')
-                    print('f1 for validation dataset:' + str(best_f1_val))
-                    last_improved = total_batch
-                    saver.save(sess=session, save_path=save_path)
-                    improved_str = '*'
-                    loss_test, acc_test, prfs, cf, y_preds_best, y_trues_best, y_probs_best = evaluate(hybridmodel, session, x_test, y_test, wordpairs_test)
-                    print('\n\n####################################')
-                    print('Accuracy for test dataset:' + str(acc_test))
-                    print('f1 for test dataset:' + str(prfs[2]))
-                    print('#################################### ')
-                    print("Binary_precision_recall_fscore_support:" + str(prfs))
-                    print('Confusion Matrix:\n', cf)
-                    print('####################################\n\n')
-                    syn0_final = syn0
-                    
-                    import sys
-                    # Get the parent directory
-                    parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-                    # Add the parent directory to the system path
-                    sys.path.insert(0, parent_dir)
                     
                 else:
                     improved_str = ''
@@ -228,8 +208,6 @@ def train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpair
                 break  
         if flag:  
             break
-
-    return  syn0_final, y_preds_best, y_trues_best, y_probs_best
 
 
 def main(_):
@@ -266,7 +244,6 @@ def main(_):
   w2vdataset.build_vocab_lists(x_train)
 
   print('------------1----------------', flush=True)
-  #w2v_source = "google"
   if FLAGS.w2v_source == "google":
     google_news_vec = "./word2vec/GoogleNews-vectors-negative300/GoogleNews-vectors-negative300.bin.gz"
     model_googlew2v = gensim.models.KeyedVectors.load_word2vec_format(google_news_vec, binary=True)
@@ -321,12 +298,8 @@ def main(_):
   print('-----------4-------------', flush=True)
   if sys.argv[1] == 'train':
       print('-----------5-------------', flush=True)
-      syn0_final, y_preds_best, y_trues_best, y_probs_best = train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpairs_dev, x_test, y_test, wordpairs_test)
+      train(hybridmodel, x_train, y_train, wordpairs_train, x_dev, y_dev, wordpairs_dev, x_test, y_test, wordpairs_test)
   print('-----------6-------------', flush=True)
-  np.save((dirembed + '/' + 'embed'), syn0_final)
-  np.save((dirembed + '/' + 'y_preds_best'), y_preds_best)
-  np.save((dirembed + '/' + 'y_trues_best'), y_trues_best)
-  np.save((dirembed + '/' + 'y_probs_best'), y_probs_best)
   with open((dirembed + '/' + 'vocab.txt'), 'w', encoding="utf-8") as fid:
     for w in w2vdataset.table_words:
       fid.write(w + '\n')
