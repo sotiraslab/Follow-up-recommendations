@@ -315,7 +315,7 @@ trainer = CustomTrainer(
     tokenizer = tokenizer,
     data_collator = collate_fn,
     compute_metrics = compute_metrics,
-    #class_weights=class_weights,
+    class_weights=class_weights,
     callbacks = [EarlyStoppingCallback(early_stopping_patience=10)]
 )
 

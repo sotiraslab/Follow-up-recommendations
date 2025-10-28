@@ -60,7 +60,7 @@ def main(
             texts.append(text)
             
             dialogs: List[Dialog] = [
-                [{"role": "user", "content": "I will provide you with some text, which belongs to the impression section of a radiology report. Can you tell me whether it contains a recommendation for a follow-up. Please respond with exactly one or two words, namely follow-up or no follow-up. The text is the following: " + text}],
+                [{"role": "user", "content": "I will provide you with some text, which belongs to the impression section of a radiology report. Can you tell me whether it contains a recommendation for a follow-up? Please respond with exactly one or two words, namely follow-up or no follow-up. The text is the following: " + text}],
             ]
             results = generator.chat_completion(
                 dialogs,  # type: ignore
