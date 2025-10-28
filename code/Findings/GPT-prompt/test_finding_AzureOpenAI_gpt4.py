@@ -32,8 +32,7 @@ i = 0
 gts = []; texts = []; predictions_gpt_4_turbo = []
 with open(test_finding_filepath, 'r') as file:
     for line in file:
-        
-        
+                
         gt, text = line.split('\t')
         gts.append(gt)
         texts.append(text)
@@ -47,8 +46,6 @@ with open(test_finding_filepath, 'r') as file:
             print(f"Error occurred: {e}")
             prediction = text
         
-       
-
         print(prediction)
         predictions_gpt_4_turbo.append(prediction)
 
