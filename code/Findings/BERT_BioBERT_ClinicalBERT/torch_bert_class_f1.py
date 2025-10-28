@@ -272,7 +272,6 @@ def evalutaion_main(file):
     print('Confusion Matrix: tn, fp, fn, tp:', tn, fp, fn, tp)
     
 if __name__ == '__main__':
-    # change data type finding/impression
-    file = 'impression'
+    file = 'finding'
     train(file)
     evalutaion_main(file)
