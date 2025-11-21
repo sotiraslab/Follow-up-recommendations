@@ -1,3 +1,5 @@
+[![DOI](https://img.shields.io/badge/DOI-10.1148%2Fradiol.242167-blue.svg)](https://doi.org/10.1148/radiol.242167)
+
 # [Large-scale evaluation of machine learning models in identifying follow-up recommendations in radiology reports](https://pubs.rsna.org/doi/10.1148/radiol.242167)
 
 Introduction
